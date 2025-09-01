@@ -45,7 +45,7 @@ jobs:
       - name: Get ECR repo URL
         id: tfout
         working-directory: terraform
-        run: echo "ECR_URL=$(terraform output -raw ecr_repo_url)" >> $GITHUB_OUTPUT
+        run: echo "ecr_url=$(terraform output -raw ecr_repo_url)" >> $GITHUB_OUTPUT
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
@@ -53,7 +53,7 @@ jobs:
       - name: Build, tag, and push image
         working-directory: app
         env:
-          ECR_URL: ${{ steps.tfout.outputs.ECR_URL }}
+          ECR_URL: ${{ steps.tfout.outputs.ecr_url }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_URL:$IMAGE_TAG .
@@ -62,14 +62,14 @@ jobs:
       - name: Terraform Apply (deploy service with new image)
         working-directory: terraform
         env:
-          TF_VAR_image_url: ${{ steps.tfout.outputs.ECR_URL }}:${{ github.sha }}
+          TF_VAR_image_url: ${{ steps.tfout.outputs.ecr_url }}:${{ github.sha }}
           TF_VAR_aws_region: ${{ env.AWS_REGION }}
         run: terraform apply -auto-approve
 
       - name: Output ALB DNS
         id: alb
         working-directory: terraform
-        run: echo "ALB_DNS=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
+        run: echo "alb_dns=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
 
       - name: Show Endpoint
-        run: echo "App URL: http://${{ steps.alb.outputs.ALB_DNS }}/"
+        run: echo "App URL: http://${{ steps.alb.outputs.alb_dns }}/"
