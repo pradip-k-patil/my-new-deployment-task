@@ -69,6 +69,3 @@ jobs:
         id: alb
         working-directory: terraform
         run: echo "alb_dns=$(terraform output -raw alb_dns_name)" >> $GITHUB_OUTPUT
-
-      - name: Show Endpoint
-        run: echo "App URL: http://${{ steps.alb.outputs.alb_dns }}/"
