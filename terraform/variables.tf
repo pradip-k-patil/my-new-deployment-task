@@ -1,7 +1,7 @@
 variable "project" {
   description = "Project/name prefix"
   type        = string
-  default     = "hello-ecs-fargate"
+  default     = "hello-world"
 }
 
 variable "aws_region" {
