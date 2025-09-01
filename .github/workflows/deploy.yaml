@@ -47,14 +47,17 @@ jobs:
         run: echo "ecr_url=$(terraform output -raw ecr_repo_url)" >> $GITHUB_OUTPUT
 
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push image
         working-directory: app
         env:
-          ECR_URL: ${{ steps.tfout.outputs.ecr_url }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_URL: ${{ steps.get-ecr.outputs.ecr_url }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          echo "Using registry: $ECR_REGISTRY"
           docker build -t $ECR_URL:$IMAGE_TAG .
           docker push $ECR_URL:$IMAGE_TAG
 
