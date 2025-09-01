@@ -36,18 +36,7 @@ jobs:
         working-directory: terraform
         run: terraform init
 
-      - name: Import ECR repo if exists
-        working-directory: terraform
-        run: |
-          set -e
-          if aws ecr describe-repositories --repository-names hello-ecs-fargate-repo >/dev/null 2>&1; then
-            echo "ECR repo exists, importing into Terraform state..."
-            terraform import aws_ecr_repository.app hello-ecs-fargate-repo || true
-          else
-            echo "ECR repo does not exist, Terraform will create it."
-          fi
-
-      # Ensure ECR repo exists before we try to push the image
+      # First create/manage ECR repository with Terraform
       - name: Terraform Apply (ECR only)
         working-directory: terraform
         run: terraform apply -target=aws_ecr_repository.app -auto-approve
@@ -65,7 +54,7 @@ jobs:
         working-directory: app
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_URL: ${{ steps.get-ecr.outputs.ecr_url }}
+          ECR_URL: ${{ steps.tfout.outputs.ecr_url }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           echo "Using registry: $ECR_REGISTRY"
