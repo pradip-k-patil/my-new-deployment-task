@@ -36,6 +36,14 @@ jobs:
         working-directory: terraform
         run: terraform init
 
+      - name: Import ECR repo if exists
+        working-directory: terraform
+        run: |
+          if aws ecr describe-repositories --repository-names hello-ecs-fargate-repo >/dev/null 2>&1; then
+            echo "Importing existing ECR repo into Terraform state..."
+            terraform import aws_ecr_repository.app hello-ecs-fargate-repo || true
+          fi
+
       # Ensure ECR repo exists before we try to push the image
       - name: Terraform Apply (ECR only)
         working-directory: terraform
