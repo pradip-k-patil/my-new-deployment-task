@@ -39,7 +39,7 @@ jobs:
       # First create/manage ECR repository with Terraform
       - name: Terraform Apply (ECR only)
         working-directory: terraform
-        run: terraform apply -target=aws_ecr_repository1.app -auto-approve
+        run: terraform apply -target=aws_ecr_repository.app -auto-approve
 
       - name: Get ECR repo URL
         id: tfout
